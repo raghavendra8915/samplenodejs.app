@@ -1,0 +1,150 @@
+
+  pipeline {
+      agent any
+       options {
+        buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '30'))
+	    timestamps()
+         }
+         parameters {
+    gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master\nrepo1\nsamplenodejs.app', name: 'Branch', type: 'PT_BRANCH'
+  }
+   tools {nodejs "NodeJS"}
+    stages{
+        stage("Install NodeJS"){
+            steps{
+            sh 'chmod 777 nvmuse'
+            sh './nvmuse'
+            sh 'node -v'
+                 }
+              }
+        stage('Install dependencies') {
+            steps {
+            sh 'npm install -g yarn'
+                  }
+              }
+              stage('Build') {
+       steps {
+         sh 'npm install'
+       }
+    }
+        stage("Git CheckOut"){
+            steps{
+                git url: "https://github.com/raghavendra8915", 
+            branch: "samplenodejs.app"
+            //credentialsId: "github-ssh"
+            //echo "Pulling changes from the branch ${params.Branch}"
+            //git url: 'https://github.com/raghavendra8915', branch: "${params.Branch}"
+                 }
+              }
+  stage("Build & Deployment for Bwell"){
+      when {
+                expression { params.Branch == 'samplenodejs.app' }
+      }
+		 steps {
+		     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		 sh 'echo "deploy to Bwell"'
+		 sh 'npm install -g yarn'
+		 sh 'yarn install --production=false'
+		     }
+		 }
+       }
+       stage("Build and Deployment for Altrua"){
+	   when {
+                expression { params.Branch == 'samplenodejs.app' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+               sh 'echo "deploy to Altrua"'
+               sh 'npm install -g yarn'
+               sh 'yarn install --production=false'
+	           }
+                 }
+               }
+		 stage("Build and Deployment for Capital-Wellness"){
+		 when {
+                expression { params.Branch == 'samplenodejs.app' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		      sh 'echo "deploy to Capital-Wellness"'
+		      sh 'npm install -g yarn'
+		      sh 'yarn install --production=false'
+	           }
+           }
+         }
+		 stage("Build and Deployment for Childrencare"){
+		 when {
+                expression { params.Branch == 'samplenodejs.app' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		      sh 'echo "deploy to Childrencare"'
+		      sh 'npm install -g yarn'
+		      sh 'yarn install --production=false'
+	           }
+           }
+         }
+      stage("Git CheckOut from repo1"){
+            steps{
+            git url: "https://github.com/raghavendra8915", 
+            branch: "repo1"
+            //echo "Pulling changes from the branch ${params.Branch}"
+            //git url: 'https://github.com/raghavendra8915', branch: "${params.Branch}"
+      stage("Build & Deployment for Bwel"){
+            when {
+                expression { params.Branch == 'repo1' }
+               }
+		 steps {
+		     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		 sh 'echo "deploy to Bwell"'
+		 sh 'npm install -g yarn'
+		 sh 'yarn install --production=false'
+		     }
+		 }
+       }
+       stage("Build and Deployment for Alt"){
+	   when {
+                expression { params.Branch == 'repo1' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+               sh 'echo "deploy to Altrua"'
+               sh 'npm install -g yarn'
+               sh 'yarn install --production=false'
+	           }
+                 }
+               }
+		 stage("Build and Deployment for Capi"){
+		 when {
+                expression { params.Branch == 'repo1' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		      sh 'echo "deploy to Capital-Wellness"'
+		      sh 'npm install -g yarn'
+		      sh 'yarn install --production=false'
+	           }
+           }
+         }
+		 stage("Build and Deployment for Child"){
+		 when {
+                expression { params.Branch == 'repo1' }
+      }
+	       steps {
+	           catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+		      sh 'echo "deploy to Childrencare"'
+		      sh 'npm install -g yarn'
+		      sh 'yarn install --production=false'
+	           }
+           }
+         }
+      }
+      post {
+          always {
+              cleanWs()
+          }
+      }
+      }
+    }
+  }
+ 
